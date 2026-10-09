@@ -76,7 +76,7 @@ def readable_math(expression):
         r'\bar a': 'mean(a)', 'q_1': 'q₁', 'q_0': 'q₀',
         'R_y': 'Rᵧ', 'U_f': 'U_f', 'f_s': 'f_s', 'a_x': 'aₓ',
         '^2': '²', '^T': 'ᵀ', '^b': 'ᵇ', '^a': 'ᵃ',
-        '^{f(x)}': 'ᶠ⁽ˣ⁾',
+        '^{f(x)}': '^(f(x))',
     }
     for original, replacement in replacements.items():
         expression = expression.replace(original, replacement)
@@ -140,7 +140,7 @@ For each experiment: **explain → predict → run → interpret → modify**. W
 
 {recap}
 
-**Instructor guidance:** have pairs compare predictions before running code. A fast learner can attempt the optional extension while others finish.
+**Working together:** compare predictions with a partner before running code. If you finish early, try an optional extension.
 '''), md('''## Setup
 
 The first cell installs a fixed teaching environment. Installation may take a few minutes. The helper functions below build explicit classical measurement registers and use 2,048 shots with seed 42. A shot means one fresh preparation and measurement of the circuit. Fixed seeds make classroom results repeatable; they do not remove sampling uncertainty.
@@ -166,13 +166,13 @@ c = intro(1, 'Qubits, gates, and interference',
 | Break and checkpoint |
 | Phase and interference; Exercise 3 |
 | Guided state preparation; Exercise 4 |
-| 115–120 | Exit questions |''',
+| Exit questions |''',
 '''A Python list can store vector components; NumPy computes norms and matrix products. A complex number has a magnitude and a phase. We will introduce the quantum meaning of these quantities here. No physics formulas need to be memorized.''')
 c += [md(r'''## From bits to circuits
 
-A classical bit takes value 0 or 1. A qubit has basis states $|0\rangle=(1,0)^T$ and $|1\rangle=(0,1)^T$. The vertical bars are **ket notation**, a name for a state vector. A general pure qubit state is $|\psi\rangle=\alpha|0\rangle+\beta|1\rangle$.
+A classical bit takes value 0 or 1. A qubit has basis states $|0\rangle=(1,0)^T$ and $|1\rangle=(0,1)^T$. The symbols | and ⟩ form **ket notation**, which names a state vector. A general pure qubit state is $|\psi\rangle=\alpha|0\rangle+\beta|1\rangle$.
 
-A circuit starts with every qubit in $|0\rangle$. Gates change the state; measurement produces classical bits. Read a Qiskit circuit left to right; wires identify qubits, boxes identify gates, and measurement arrows point to classical storage. A quantum circuit is not a program that reads out all possible answers at once.
+In these simulations, a circuit starts with every qubit in $|0\rangle$. Gates change the state; measurement produces classical bits. Read a Qiskit circuit left to right; wires identify qubits, boxes identify gates, and measurement arrows point to classical storage. A quantum circuit is not a program that reads out all possible answers at once.
 
 **Predict:** What should a circuit with no gates return? Run this first circuit and identify the classical register in its diagram.'''), code('''first = QuantumCircuit(QuantumRegister(1, 'q'), ClassicalRegister(1, 'result'))
 first.measure(0, 0)
@@ -284,13 +284,13 @@ c = intro(2, 'Entanglement and superdense coding',
 | Break and checkpoint |
 | Superdense coding step by step |
 | All four messages; Exercise 4 |
-| 115–120 | Exit questions and resource accounting |''',
+| Exit questions and resource accounting |''',
 '''From Lab 1: X flips a bit, H creates or reverses superposition, and Z changes relative phase. Measurement probabilities are squared amplitude magnitudes. H immediately before measurement changes from the Z basis to the X basis. This notebook repeats all setup and helper code, so no earlier notebook needs to be open.''')
 c += [md(r'''## Two qubits and bit ordering
 
 Two qubits have four basis states. Qiskit displays strings as **q1 q0**, so `01` means q1=0 and q0=1. The amplitude array is ordered `00, 01, 10, 11`. The lowest-index qubit q0 is the least significant bit. Circuit diagrams still put q0 on the top wire.
 
-For a product state, $|q_1\rangle\otimes|q_0\rangle$, tensor products multiply the single-qubit amplitudes. For example, q1 in $|0\rangle$ and q0 in $|+\rangle$ gives $(|00\rangle+|01\rangle)/\sqrt2$. A two-qubit state need not be expressible as a product.'''), exercise(1, 'Read the bit string', 'The baseline flips q0. Predict the only outcome. Change it to flip q1, then flip both. Finally prepare q1=0 and q0=plus and compare the vector with `np.kron`.', 'For Qiskit state vectors, write the tensor factors in descending qubit index.', 'X on q0 gives `01`; X on q1 gives `10`; both give `11`. H on q0 alone gives `[1,1,0,0]/sqrt(2)`, equal to `np.kron([1,0], [1,1]/sqrt(2))`.'), code('''ordering = QuantumCircuit(2)
+For a product state, $|q_1\rangle\otimes|q_0\rangle$, tensor products multiply the single-qubit amplitudes. For example, q1 in $|0\rangle$ and q0 in $|+\rangle$ gives $(|00\rangle+|01\rangle)/\sqrt2$. A two-qubit state need not be expressible as a product.'''), exercise(1, 'Read the bit string', 'The baseline flips q0. Predict the only outcome. Change it to flip q1, then flip both. Finally prepare q1=0 and q0=plus and compare the vector with `np.kron`.', 'For Qiskit state vectors, write the tensor factors in descending qubit index.', 'X on q0 gives `01`; X on q1 gives `10`; both give `11`. H on q0 alone gives `[1,1,0,0]/sqrt(2)`, equal to `np.kron([1,0], np.array([1,1])/np.sqrt(2))`.'), code('''ordering = QuantumCircuit(2)
 ordering.x(0)
 show(ordering)
 print('State:', Statevector.from_instruction(ordering).data)
@@ -322,7 +322,7 @@ compare(changed_bell, 'Modified Bell pair')'''), md(r'''## Correlation versus en
 
 Consider a classical source that chooses `00` or `11` with equal probability. This **mixture** has the same Z probabilities as $|\Phi^+\rangle$. Its density matrix averages the outer products of those two states; the Bell state has additional off-diagonal terms representing coherence.
 
-To measure both qubits in X, apply H to each before Z measurement. Bit 0 labels plus and bit 1 labels minus. The Bell pair still agrees in X. The classical mixture produces all four X outcomes equally often. This comparison distinguishes these two specified preparations. It is not a Bell-inequality experiment or a general entanglement certification protocol.
+To measure both qubits in X, apply H to each before Z measurement. Bit 0 labels plus and bit 1 labels minus. The Bell pair still agrees in X. The classical mixture gives each of the four X outcomes probability 1/4; sampled counts can fluctuate. This comparison distinguishes these two specified preparations. It is not a Bell-inequality experiment or a general entanglement certification protocol.
 
 We sample the mixture by preparing each branch on half the shots and pooling counts. This fixed 50/50 allocation models the equal mixture without adding random variation to its branch weights.'''), code('''def in_basis(circuit, basis):
     rotated = circuit.copy()
@@ -454,13 +454,13 @@ c = intro(3, 'Quantum algorithms: hidden strings and search',
 | Break and checkpoint |
 | Grover oracle, diffusion, amplitudes; Exercise 3 |
 | Marked states and iteration counts; Exercise 4 |
-| 115–120 | Exit questions and limitations |''',
+| Exit questions and limitations |''',
 '''H creates plus/minus states; a relative phase can affect later measurement through interference. CNOT acts linearly and can correlate qubits. Qiskit labels computational-basis strings with the highest qubit index on the left. All imports and helpers are repeated here; no earlier kernel state is required.''')
 c += [md(r'''## What is an oracle?
 
 An **oracle** is a specified interface to a function. A reversible bit oracle implements $U_f|x\rangle|y\rangle=|x\rangle|y\oplus f(x)\rangle$, where $\oplus$ is XOR. It can be applied to superpositions, but measurement does not reveal every function value.
 
-**Query complexity** counts calls to this interface, treating each call as one unit. It leaves out gate construction, state preparation, communication, and measurement overhead. Our small oracles are built from known answers so that we can study algorithm behavior. This is an educational black-box model, not a claim that discovering an answer and building an oracle is free.'''), exercise(1, 'Read a reversible oracle', 'For f(x)=x on one input bit, a CNOT implements the oracle. Predict outputs for all four pairs (x,y), then run. Explain why replacing y with f(x) without keeping x would generally lose information.', 'The target becomes y XOR x, and the control is unchanged. Applying CNOT twice restores the input.', 'For (x,y)=00,01,10,11 the output pairs are 00,01,11,10. The printed Qiskit strings are yx, so inspect that ordering carefully. Reversible gates must preserve distinguishability; overwriting information generally does not.'), code('''for x in [0, 1]:
+**Query complexity** counts calls to this interface, treating each call as one unit. It leaves out gate construction, state preparation, communication, and measurement overhead. Our small oracles are built from known answers so that we can study algorithm behavior. This is an educational black-box model, not a claim that discovering an answer and building an oracle is free.'''), exercise(1, 'Read a reversible oracle', 'For f(x)=x on one input bit, a CNOT implements the oracle. Predict outputs for all four pairs (x,y), then run. Explain why overwriting y with f(x), even while retaining x, loses the original y and is not reversible.', 'The target becomes y XOR x, and the control is unchanged. Applying CNOT twice restores the input.', 'For (x,y)=00,01,10,11 the output pairs are 00,01,11,10. The printed Qiskit strings are yx, so inspect that ordering carefully. Overwriting y maps (x,0) and (x,1) to the same (x,f(x)), so the original y cannot be recovered. XOR preserves it: applying the same oracle twice restores both inputs.'), code('''for x in [0, 1]:
     for y in [0, 1]:
         oracle_demo = QuantumCircuit(2)
         if x: oracle_demo.x(0)
